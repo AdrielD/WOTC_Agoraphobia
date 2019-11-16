@@ -9,6 +9,7 @@ var config int WILL_PENALTY_AT_LOW_COVER;
 var config int WILL_PENALTY_CHANCE_AT_LOW_COVER;
 var config int PANIC_CHANCE_AT_LOW_COVER;
 var config bool ALSO_APPLY_TO_CONCEALED_UNITS;
+var config array<name> IGNORE_UNIT_TEMPLATES;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -40,7 +41,10 @@ static protected function EventListenerReturn OnPlayerTurnEnded(Object EventData
 
 static function bool ShouldRollAgoraphobia(XComGameState_Unit TargetUnit)
 {
-	if(TargetUnit.UsesWillSystem() && TargetUnit.CanTakeCover())
+	if(TargetUnit.IsPlayerControlled()
+		&& TargetUnit.UsesWillSystem()
+		&& TargetUnit.CanTakeCover()
+		&& default.IGNORE_UNIT_TEMPLATES.Find(TargetUnit.GetMyTemplateName()) < 0)
 	{
 		if(default.ALSO_APPLY_TO_CONCEALED_UNITS)
 			return true;
