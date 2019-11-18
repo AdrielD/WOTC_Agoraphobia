@@ -1,15 +1,39 @@
 class X2EventListener_Agoraphobia extends X2EventListener
-	dependson(XComGameStateContext_WillRoll)
-	config(WOTCAgoraphobia);
+	dependson(XComGameStateContext_WillRoll);
 
-// Agoraphobia configurable variables
-var config int WILL_PENALTY_AT_OPEN_GROUND;
-var config int PANIC_CHANCE_AT_OPEN_GROUND;
-var config int WILL_PENALTY_AT_LOW_COVER;
-var config int WILL_PENALTY_CHANCE_AT_LOW_COVER;
-var config int PANIC_CHANCE_AT_LOW_COVER;
-var config bool ALSO_APPLY_TO_CONCEALED_UNITS;
-var config array<name> IGNORE_UNIT_TEMPLATES;
+`include(WOTC_Agoraphobia/Src/ModConfigMenuAPI/MCM_API_CfgHelpers.uci)
+
+`MCM_CH_StaticVersionChecker(class'WOTCAgoraphobia_Defaults'.default.VERSION, class'UIScreenlistenerMCM_WOTC_Agoraphobia'.default.MCM_ConfigVersion)
+
+static function int GetWillPenaltyAtOpenGround()
+{
+	return `MCM_CH_GetValue(class'WOTCAgoraphobia_Defaults'.default.WILL_PENALTY_AT_OPEN_GROUND, class'UIScreenlistenerMCM_WOTC_Agoraphobia'.default.MCM_WillPenaltyAtOpenGround);
+}
+
+static function int GetPanicChanceAtOpenGround()
+{
+	return `MCM_CH_GetValue(class'WOTCAgoraphobia_Defaults'.default.PANIC_CHANCE_AT_OPEN_GROUND, class'UIScreenlistenerMCM_WOTC_Agoraphobia'.default.MCM_PanicChanceAtOpenGround);
+}
+
+static function int GetWillPenaltyAtLowCover()
+{
+	return `MCM_CH_GetValue(class'WOTCAgoraphobia_Defaults'.default.WILL_PENALTY_AT_LOW_COVER, class'UIScreenlistenerMCM_WOTC_Agoraphobia'.default.MCM_WillPenaltyAtLowCover);
+}
+
+static function int GetWillPenaltyChanceAtLowCover()
+{
+	return `MCM_CH_GetValue(class'WOTCAgoraphobia_Defaults'.default.WILL_PENALTY_CHANCE_AT_LOW_COVER, class'UIScreenlistenerMCM_WOTC_Agoraphobia'.default.MCM_WillPenaltyChanceAtLowCover);
+}
+
+static function int GetPaniacChanceAtLowCover()
+{
+	return `MCM_CH_GetValue(class'WOTCAgoraphobia_Defaults'.default.PANIC_CHANCE_AT_LOW_COVER, class'UIScreenlistenerMCM_WOTC_Agoraphobia'.default.MCM_PaniacChanceAtLowCover);
+}
+
+static function bool GetAlsoApplyToConcealedUnits()
+{
+	return `MCM_CH_GetValue(class'WOTCAgoraphobia_Defaults'.default.ALSO_APPLY_TO_CONCEALED_UNITS, class'UIScreenlistenerMCM_WOTC_Agoraphobia'.default.MCM_AlsoApplyToConcealedUnits);
+}
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -41,12 +65,19 @@ static protected function EventListenerReturn OnPlayerTurnEnded(Object EventData
 
 static function bool ShouldRollAgoraphobia(XComGameState_Unit TargetUnit)
 {
+	local XComGameState_EvacZone EvacZone;
+	EvacZone = class'XComGameState_EvacZone'.static.GetEvacZone(TargetUnit.GetTeam());
+
 	if(TargetUnit.IsPlayerControlled()
 		&& TargetUnit.UsesWillSystem()
 		&& TargetUnit.CanTakeCover()
-		&& default.IGNORE_UNIT_TEMPLATES.Find(TargetUnit.GetMyTemplateName()) < 0)
+		&& !TargetUnit.IsUnconscious()
+		&& !TargetUnit.IsDazed()
+		&& !TargetUnit.bRemovedFromPlay
+		&& !EvacZone.IsUnitInEvacZone(TargetUnit)
+		&& class'WOTCAgoraphobia_Defaults'.default.IGNORE_UNIT_TEMPLATES.Find(TargetUnit.GetMyTemplateName()) < 0)
 	{
-		if(default.ALSO_APPLY_TO_CONCEALED_UNITS)
+		if(GetAlsoApplyToConcealedUnits())
 			return true;
 		else
 			return !TargetUnit.IsConcealed();
@@ -76,13 +107,13 @@ static function ApplyWillPenaltyOnTurnEnd(Object EventData)
 
 static function ApplyAgoraphobiaAtLowCover(XComGameState_Unit TargetUnit)
 {
-	if(Rand(100) <= default.WILL_PENALTY_CHANCE_AT_LOW_COVER)
-		SubmitUnitWillChangeToGameState(TargetUnit, default.WILL_PENALTY_AT_LOW_COVER, default.PANIC_CHANCE_AT_LOW_COVER);
+	if(Rand(100) <= GetWillPenaltyChanceAtLowCover())
+		SubmitUnitWillChangeToGameState(TargetUnit, GetWillPenaltyAtLowCover(), GetPaniacChanceAtLowCover());
 }
 
 static function ApplyAgoraphobiaAtOpenGround(XComGameState_Unit TargetUnit)
 {
-	SubmitUnitWillChangeToGameState(TargetUnit, default.WILL_PENALTY_AT_OPEN_GROUND, default.PANIC_CHANCE_AT_OPEN_GROUND);
+	SubmitUnitWillChangeToGameState(TargetUnit, GetWillPenaltyAtOpenGround(), GetPanicChanceAtOpenGround());
 }
 
 static function SubmitUnitWillChangeToGameState(XComGameState_Unit TargetUnit, int WillLossAmount, int PanicChance)

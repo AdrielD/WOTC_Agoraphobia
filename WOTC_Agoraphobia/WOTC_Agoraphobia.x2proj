@@ -3,29 +3,40 @@
   <PropertyGroup>
     <Guid>85f2a269-26bc-4c91-9306-30ea1ab5124e</Guid>
     <Name>WOTC_Agoraphobia</Name>
-    <Description>Your soldiers now have a fear of open, insecure spaces.
+    <Description>[h1] Your soldiers now have a fear of open, insecure spaces. [/h1]
+
+[quote=@yes_commander] 6 out of 6 troops shaken. [/quote]
 
 Adds a Second Wave option that decreases Will for a soldier left at an unsafe position at the end of player turn:
-- When at Open ground (no cover), decreases Will by 4.
-- When at Low cover, there is a 30% chance of decreasing Will by 1.
 
-Those values are configurable in the XComWOTCAgoraphobia.ini file.
+[list]
+  [*] When at Open ground (no cover), the soldier will loose Will by an amount (default: 4).
+  [*] There is a chance for the soldier to Panic or became Shattered if left at open ground!
+  [*] When at Low cover, there is a chance (default: 30%) of decreasing Will by a smaller amount (default: 1).
+  [*] By default, there is no chance to roll Panic or Shatter when the soldier is left at low cover, BUT, if you want an extra kick in the teeth, you can change that..
+  [*] Also by default, even concealed units will suffer from Agoraphobia effects, unless you disable it.
+  [*] Agoraphobia will not be applied to: units that cannot take cover, units on the evac zone (as it could be considered a safe zone) and units not affected by Will system.
+[/list]
 
-COMPATIBILITY:
+Most of this options are configurable in the XComWOTCAgoraphobia.ini file!
+
+As an advanced option, you can also blacklist some units by using their template names. So, if you have a mod that adds a custom badass soldier and do not want it cowering in the corner, you can configure that.
+This idea inspired by:
+[quote=@CaptainForgeball] Is it possible to add certain types of units / class to be immune to this effect? [/quote]
+
+[b] RECOMENDATIONS: [/b]
+- Use the [url=steamcommunity.com/sharedfiles/filedetails/?id=1134266810] Show Will Loss mod[/url] to see the Will lost as a flyover message over your soldiers!
+- If you don't want to start a new campaign, this mod is compatile with [url=steamcommunity.com/sharedfiles/filedetails/?id=1149493976] Better Second Wave Mod Support mod [/url]. Once installed, access the game menu, click on Change Difficulty and on Toggle Advanced Options view. There, you can toggle Agoraphobia on and off, even mid battle!
+- Surviving the horrors of this Second Wave is not an easy task, your soldiers will probably need a few drinks to feel better. [url=/steamcommunity.com/sharedfiles/filedetails/?id=1287107824] Core Room Slots mod [/url] adds 4 slots at the Avenger's bar, to increase Will recovery.
+
+[b] COMPATIBILITY: [/b]
 - No class overrides, so it should not break anything;
 
-TODO:
-- Make it work with Show Will Loss mod (https://steamcommunity.com/sharedfiles/filedetails/?id=1134266810) by triggering the correct event;
-- Add Mod Config support (so you can tweak things in-game);
-- Panic is not rolled yet. It's not a bug, but I feel it should happen for thematic reasons;
-- Pan camera to each affected soldier;
-- Make soldiers say something;
-- Add certain types of units / class to be immune to this effect, or at least dont apply to units that cannot take cover at all - suggested by @CaptainForgeball
-- Add option to ignore Agoraphobia effects if units are concealed;
-- Scale Will penalties with difficulty;
+[b] TODO: [/b]
+- Add Mod Config Menu support (so you can tweak things in-game);
 
-KNOWN ISSUES:
-- The animation for Will bar decrease is repeating for every team turn, despite actually happening only at the end of XCom's turn. The amount is subtracted correctelly, it's just the animation repeating x4 more times than it should;</Description>
+[b] KNOWN ISSUES: [/b]
+- The animation for Will bar decrease is repeating for every team turn. The amount is correctelly subtracted, it's just a visual glitch and kind of difficult to debug. Hope it does not bother you that much until I can fix that!</Description>
     <SteamPublishID>0</SteamPublishID>
     <AssemblyName>WOTC_Agoraphobia</AssemblyName>
     <RootNamespace>WOTC_Agoraphobia</RootNamespace>
@@ -38,6 +49,8 @@ KNOWN ISSUES:
     <Folder Include="Config\" />
     <Folder Include="Localization\" />
     <Folder Include="Src\" />
+    <Folder Include="Src\ModConfigMenuAPI" />
+    <Folder Include="Src\ModConfigMenuAPI\Classes" />
     <Folder Include="Src\WOTC_Agoraphobia\" />
     <Folder Include="Src\WOTC_Agoraphobia\Classes\" />
   </ItemGroup>
@@ -53,6 +66,51 @@ KNOWN ISSUES:
     <Content Include="Config\XComEditor.ini" />
     <Content Include="Config\XComEngine.ini" />
     <Content Include="Config\XComGame.ini" />
+    <Content Include="Src\ModConfigMenuAPI\Classes\MCM_API.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\ModConfigMenuAPI\Classes\MCM_API_Button.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\ModConfigMenuAPI\Classes\MCM_API_Checkbox.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\ModConfigMenuAPI\Classes\MCM_API_Dropdown.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\ModConfigMenuAPI\Classes\MCM_API_Instance.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\ModConfigMenuAPI\Classes\MCM_API_Label.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\ModConfigMenuAPI\Classes\MCM_API_Setting.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\ModConfigMenuAPI\Classes\MCM_API_SettingsGroup.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\ModConfigMenuAPI\Classes\MCM_API_SettingsPage.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\ModConfigMenuAPI\Classes\MCM_API_Slider.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\ModConfigMenuAPI\Classes\MCM_API_Spinner.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\ModConfigMenuAPI\MCM_API_Includes.uci">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_Agoraphobia\Classes\UIScreenlistenerMCM_WOTC_Agoraphobia.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_Agoraphobia\Classes\WOTCAgoraphobia_Defaults.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTC_Agoraphobia\Classes\X2DownloadableContentInfo_WOTC_Agoraphobia.uc" />
     <Content Include="Src\WOTC_Agoraphobia\Classes\X2EventListener_Agoraphobia.uc">
       <SubType>Content</SubType>
