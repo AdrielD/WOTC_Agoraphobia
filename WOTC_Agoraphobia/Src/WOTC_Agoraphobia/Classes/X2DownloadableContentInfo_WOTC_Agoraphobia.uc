@@ -11,8 +11,8 @@
 class X2DownloadableContentInfo_WOTC_Agoraphobia extends X2DownloadableContentInfo;
 
 // Second Wave List Entry Variables
-var localized string strWOTCAgoraphobiaSecondWaveDescription;
-var localized string strWOTCAgoraphobiaSecondWaveTooltip;
+var localized string strWOTCAgoraphobiaDescription;
+var localized string strWOTCAgoraphobiaTooltip;
 
 static event OnPostTemplatesCreated()
 {
@@ -35,7 +35,7 @@ static function UpdateSecondWaveOptionsList()
 	{
 		UIShellDifficulty = UIShellDifficulty(ArrayObject);
 		UIShellDifficulty.SecondWaveOptions.AddItem(WOTCAgoraphobia_Option);
-		UIShellDifficulty.SecondWaveDescriptions.AddItem(default.strWOTCAgoraphobiaSecondWaveDescription);
-		UIShellDifficulty.SecondWaveToolTips.AddItem(default.strWOTCAgoraphobiaSecondWaveTooltip);
+		UIShellDifficulty.SecondWaveDescriptions.AddItem(default.strWOTCAgoraphobiaDescription);
+		UIShellDifficulty.SecondWaveToolTips.AddItem(default.strWOTCAgoraphobiaTooltip);
 	}
 }

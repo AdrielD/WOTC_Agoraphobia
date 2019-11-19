@@ -1,39 +1,8 @@
 class X2EventListener_Agoraphobia extends X2EventListener
-	dependson(XComGameStateContext_WillRoll);
+	dependson(Agoraphobia_DefaultSettings, XComGameStateContext_WillRoll);
 
 `include(WOTC_Agoraphobia/Src/ModConfigMenuAPI/MCM_API_CfgHelpers.uci)
-
-`MCM_CH_StaticVersionChecker(class'WOTCAgoraphobia_Defaults'.default.VERSION, class'UIScreenlistenerMCM_WOTC_Agoraphobia'.default.MCM_ConfigVersion)
-
-static function int GetWillPenaltyAtOpenGround()
-{
-	return `MCM_CH_GetValue(class'WOTCAgoraphobia_Defaults'.default.WILL_PENALTY_AT_OPEN_GROUND, class'UIScreenlistenerMCM_WOTC_Agoraphobia'.default.MCM_WillPenaltyAtOpenGround);
-}
-
-static function int GetPanicChanceAtOpenGround()
-{
-	return `MCM_CH_GetValue(class'WOTCAgoraphobia_Defaults'.default.PANIC_CHANCE_AT_OPEN_GROUND, class'UIScreenlistenerMCM_WOTC_Agoraphobia'.default.MCM_PanicChanceAtOpenGround);
-}
-
-static function int GetWillPenaltyAtLowCover()
-{
-	return `MCM_CH_GetValue(class'WOTCAgoraphobia_Defaults'.default.WILL_PENALTY_AT_LOW_COVER, class'UIScreenlistenerMCM_WOTC_Agoraphobia'.default.MCM_WillPenaltyAtLowCover);
-}
-
-static function int GetWillPenaltyChanceAtLowCover()
-{
-	return `MCM_CH_GetValue(class'WOTCAgoraphobia_Defaults'.default.WILL_PENALTY_CHANCE_AT_LOW_COVER, class'UIScreenlistenerMCM_WOTC_Agoraphobia'.default.MCM_WillPenaltyChanceAtLowCover);
-}
-
-static function int GetPaniacChanceAtLowCover()
-{
-	return `MCM_CH_GetValue(class'WOTCAgoraphobia_Defaults'.default.PANIC_CHANCE_AT_LOW_COVER, class'UIScreenlistenerMCM_WOTC_Agoraphobia'.default.MCM_PaniacChanceAtLowCover);
-}
-
-static function bool GetAlsoApplyToConcealedUnits()
-{
-	return `MCM_CH_GetValue(class'WOTCAgoraphobia_Defaults'.default.ALSO_APPLY_TO_CONCEALED_UNITS, class'UIScreenlistenerMCM_WOTC_Agoraphobia'.default.MCM_AlsoApplyToConcealedUnits);
-}
+`MCM_CH_StaticVersionChecker(class'Agoraphobia_DefaultSettings'.default.VERSION, class'Agoraphobia_MCMSettings'.default.MCM_Version)
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -75,9 +44,9 @@ static function bool ShouldRollAgoraphobia(XComGameState_Unit TargetUnit)
 		&& !TargetUnit.IsDazed()
 		&& !TargetUnit.bRemovedFromPlay
 		&& !EvacZone.IsUnitInEvacZone(TargetUnit)
-		&& class'WOTCAgoraphobia_Defaults'.default.IGNORE_UNIT_TEMPLATES.Find(TargetUnit.GetMyTemplateName()) < 0)
+		&& class'Agoraphobia_DefaultSettings'.default.IGNORE_UNIT_TEMPLATES.Find(TargetUnit.GetMyTemplateName()) < 0)
 	{
-		if(GetAlsoApplyToConcealedUnits())
+		if(DoesApplyToConcealedunits())
 			return true;
 		else
 			return !TargetUnit.IsConcealed();
@@ -97,23 +66,32 @@ static function ApplyWillPenaltyOnTurnEnd(Object EventData)
 		{
 			CoverType = TargetUnit.GetCoverTypeFromLocation();
 
-			if(CoverType == CT_MidLevel)
+			if(CoverType == CT_None)
+				ApplyAgoraphobiaAtNoCover(TargetUnit);
+			else if(CoverType == CT_MidLevel)
 				ApplyAgoraphobiaAtLowCover(TargetUnit);
-			else if(CoverType == CT_None)
-				ApplyAgoraphobiaAtOpenGround(TargetUnit);
+			else if(CoverType == CT_Standing)
+				ApplyAgoraphobiaAtHighCover(TargetUnit);
 		}
 	}
 }
 
-static function ApplyAgoraphobiaAtLowCover(XComGameState_Unit TargetUnit)
+static function ApplyAgoraphobiaAtNoCover(XComGameState_Unit TargetUnit)
 {
-	if(Rand(100) <= GetWillPenaltyChanceAtLowCover())
-		SubmitUnitWillChangeToGameState(TargetUnit, GetWillPenaltyAtLowCover(), GetPaniacChanceAtLowCover());
+	if(Rand(100) <= GetLossChanceAtNoCover())
+		SubmitUnitWillChangeToGameState(TargetUnit, GetWillLossAtNoCover(), GetPanicChanceAtNoCover());
 }
 
-static function ApplyAgoraphobiaAtOpenGround(XComGameState_Unit TargetUnit)
+static function ApplyAgoraphobiaAtLowCover(XComGameState_Unit TargetUnit)
 {
-	SubmitUnitWillChangeToGameState(TargetUnit, GetWillPenaltyAtOpenGround(), GetPanicChanceAtOpenGround());
+	if(Rand(100) <= GetLossChanceAtLowCover())
+		SubmitUnitWillChangeToGameState(TargetUnit, GetWillLossAtLowCover(), GetPanicChanceAtLowCover());
+}
+
+static function ApplyAgoraphobiaAtHighCover(XComGameState_Unit TargetUnit)
+{
+	if(Rand(100) <= GetLossChanceAtHighCover())
+		SubmitUnitWillChangeToGameState(TargetUnit, GetWillLossAtHighCover(), GetPanicChanceAtHighCover());
 }
 
 static function SubmitUnitWillChangeToGameState(XComGameState_Unit TargetUnit, int WillLossAmount, int PanicChance)
@@ -142,3 +120,37 @@ static function SubmitUnitWillChangeToGameState(XComGameState_Unit TargetUnit, i
 	WillRollContext.DoWillRoll(AgoraphobiaWillRollData);
 	WillRollContext.Submit();
 }
+
+// High Cover
+static function int GetWillLossAtHighCover()
+{ return `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.HIGH_COVER.WILL_LOSS, class'Agoraphobia_MCMSettings'.default.MCM_HighCover.WillLoss); }
+
+static function int GetLossChanceAtHighCover()
+{ return `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.HIGH_COVER.LOSS_CHANCE, class'Agoraphobia_MCMSettings'.default.MCM_HighCover.LossChance); }
+
+static function int GetPanicChanceAtHighCover()
+{ return `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.HIGH_COVER.PANIC_CHANCE, class'Agoraphobia_MCMSettings'.default.MCM_HighCover.PanicChance); }
+
+// Low Cover
+static function int GetWillLossAtLowCover()
+{ return `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.LOW_COVER.WILL_LOSS, class'Agoraphobia_MCMSettings'.default.MCM_LowCover.WillLoss); }
+
+static function int GetLossChanceAtLowCover()
+{ return `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.LOW_COVER.LOSS_CHANCE, class'Agoraphobia_MCMSettings'.default.MCM_LowCover.LossChance); }
+
+static function int GetPanicChanceAtLowCover()
+{ return `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.LOW_COVER.PANIC_CHANCE, class'Agoraphobia_MCMSettings'.default.MCM_LowCover.PanicChance); }
+
+// No Cover
+static function int GetWillLossAtNoCover()
+{ return `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.NO_COVER.WILL_LOSS, class'Agoraphobia_MCMSettings'.default.MCM_NoCover.WillLoss); }
+
+static function int GetLossChanceAtNoCover()
+{ return `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.NO_COVER.LOSS_CHANCE, class'Agoraphobia_MCMSettings'.default.MCM_NoCover.LossChance); }
+
+static function int GetPanicChanceAtNoCover()
+{ return `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.NO_COVER.PANIC_CHANCE, class'Agoraphobia_MCMSettings'.default.MCM_NoCover.PanicChance); }
+
+// Miscellanious
+static function bool DoesApplyToConcealedunits()
+{ return `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.ALSO_APPLY_TO_CONCEALED_UNITS, class'Agoraphobia_MCMSettings'.default.MCM_AlsoApplyToConcealedUnits); }

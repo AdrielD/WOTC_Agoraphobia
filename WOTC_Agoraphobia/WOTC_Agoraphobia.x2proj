@@ -7,36 +7,50 @@
 
 [quote=@yes_commander] 6 out of 6 troops shaken. [/quote]
 
-Adds a Second Wave option that decreases Will for a soldier left at an unsafe position at the end of player turn:
+Adds a Second Wave option that decreases Will for a soldier left at an unsafe position [i] at the end of player's turn [/i]. By default, this mods causes:
 
 [list]
-  [*] When at Open ground (no cover), the soldier will loose Will by an amount (default: 4).
-  [*] There is a chance for the soldier to Panic or became Shattered if left at open ground!
+  [*] When at Open ground (no cover), the soldier will loose Will by an amount (default: 4) and have a chance to Panic or became Shattered.
   [*] When at Low cover, there is a chance (default: 30%) of decreasing Will by a smaller amount (default: 1).
-  [*] By default, there is no chance to roll Panic or Shatter when the soldier is left at low cover, BUT, if you want an extra kick in the teeth, you can change that..
-  [*] Also by default, even concealed units will suffer from Agoraphobia effects, unless you disable it.
-  [*] Agoraphobia will not be applied to: units that cannot take cover, units on the evac zone (as it could be considered a safe zone) and units not affected by Will system.
+  [*] Concealed units will also suffer from Agoraphobia effects, unless you disable it.
+  [*] High Cover is considered safe place and there is no chance to roll Panic or Shatter when the soldier is left at some type of cover.
 [/list]
 
-Most of this options are configurable in the XComWOTCAgoraphobia.ini file!
+HOWEVER, if you want an extra kick in the teeth, you can change all that! Add panic chances for high cover, cranck up Will loss, make your missions a real nightmare... you call! All options are configurable in the [u] XComAgoraphobia_DefaultSettings.ini [/u] file or by using the [u] Mod Config Menu [/u].
+
+[i] * Agoraphobia will not be applied to: units that cannot take cover, units on the evac zone (as it could be considered a safe zone) and units not affected by Will system. [/i]
 
 As an advanced option, you can also blacklist some units by using their template names. So, if you have a mod that adds a custom badass soldier and do not want it cowering in the corner, you can configure that.
-This idea inspired by:
-[quote=@CaptainForgeball] Is it possible to add certain types of units / class to be immune to this effect? [/quote]
 
-[b] RECOMENDATIONS: [/b]
-- Use the [url=steamcommunity.com/sharedfiles/filedetails/?id=1134266810] Show Will Loss mod[/url] to see the Will lost as a flyover message over your soldiers!
+
+[b] RECOMENDED MODS: [/b]
+- The essential [url=steamcommunity.com/sharedfiles/filedetails/?id=667104300] Mod Config Menu [/url]. MCM creates a page at the Options menu for all mods that supports it. You can change all settings of Agoraphobia right inside the game!
+- Use [url=steamcommunity.com/sharedfiles/filedetails/?id=1134266810] Show Will Loss mod[/url] to visualize Will loss as a flyover message over your soldiers!
 - If you don't want to start a new campaign, this mod is compatile with [url=steamcommunity.com/sharedfiles/filedetails/?id=1149493976] Better Second Wave Mod Support mod [/url]. Once installed, access the game menu, click on Change Difficulty and on Toggle Advanced Options view. There, you can toggle Agoraphobia on and off, even mid battle!
-- Surviving the horrors of this Second Wave is not an easy task, your soldiers will probably need a few drinks to feel better. [url=/steamcommunity.com/sharedfiles/filedetails/?id=1287107824] Core Room Slots mod [/url] adds 4 slots at the Avenger's bar, to increase Will recovery.
+- Surviving the horrors of this Second Wave is not an easy task, your soldiers will probably need a few drinks to feel better. [url=/steamcommunity.com/sharedfiles/filedetails/?id=1287107824] Core Room Slots mod [/url] adds 4 slots at the Avenger's bar, to increase Will recovery!
 
 [b] COMPATIBILITY: [/b]
 - No class overrides, so it should not break anything;
 
 [b] TODO: [/b]
-- Add Mod Config Menu support (so you can tweak things in-game);
+- Add an option to cap Will loss per mission;
 
 [b] KNOWN ISSUES: [/b]
-- The animation for Will bar decrease is repeating for every team turn. The amount is correctelly subtracted, it's just a visual glitch and kind of difficult to debug. Hope it does not bother you that much until I can fix that!</Description>
+- A visual glitch happens at the end of every team turn, when the Will bar will jump back to previous value and then decrease again. Values are subtracted correctly, so it does not affect gameplay. It's still a pain-in-the-sectopod to debug, but I'm still trying!
+
+[b] Suggestions given by you and inspired / implemented on this mod: [/b]
+- Added a whitelist of units that will not suffer Agoraphobia:
+[quote=@CaptainForgeball] Is it possible to add certain types of units / class to be immune to this effect? [/quote]
+
+- Added compatibility for Better Second Wave Mod Support:
+[quote=@yes_commander] My only question now is whether this will register properly if I add it to a campaign already in progress. [/quote]
+
+- Disable Agoraphobia for the Evac Zone (and fixed related bug):
+[quote=@Marcus] works as it should, but you don`t want this when you are on the evac zone - panic then run off to hide. [/quote]
+[quote=@yes_commander] every turn that someone has been off the map, it counts them as still being in the evac zone out in the open [/quote]
+
+- Enable all Agoraphobia option for high cover as well and will loss cap (to be implemented):
+[@quote=Eendee] Is it possible to add an option to cap will loss from Agoraphobia per mission and/or add separate configurable will loss chance for soldiers in high cover? [/quote]</Description>
     <SteamPublishID>0</SteamPublishID>
     <AssemblyName>WOTC_Agoraphobia</AssemblyName>
     <RootNamespace>WOTC_Agoraphobia</RootNamespace>
@@ -55,7 +69,7 @@ This idea inspired by:
     <Folder Include="Src\WOTC_Agoraphobia\Classes\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Config\XComWOTCAgoraphobia.ini">
+    <Content Include="Config\XComAgoraphobia_DefaultSettings.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Localization\WOTC_Agoraphobia.int">
@@ -105,10 +119,13 @@ This idea inspired by:
     <Content Include="Src\ModConfigMenuAPI\MCM_API_Includes.uci">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\WOTC_Agoraphobia\Classes\UIScreenlistenerMCM_WOTC_Agoraphobia.uc">
+    <Content Include="Src\WOTC_Agoraphobia\Classes\Agoraphobia_DefaultSettings.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\WOTC_Agoraphobia\Classes\WOTCAgoraphobia_Defaults.uc">
+    <Content Include="Src\WOTC_Agoraphobia\Classes\Agoraphobia_MCMSettings.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_Agoraphobia\Classes\UIScreenlistenerMCM_WOTC_Agoraphobia.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTC_Agoraphobia\Classes\X2DownloadableContentInfo_WOTC_Agoraphobia.uc" />
