@@ -11,6 +11,9 @@ var config CoverType MCM_HighCover;
 var config CoverType MCM_LowCover;
 var config CoverType MCM_NoCover;
 
+var config bool MCM_ApplyFlankingRules;
+var config int MCM_SmokePanicReduction;
+var config int MCM_MarkedPanicIncrease;
 var config bool MCM_AlsoApplyToConcealedUnits;
 
 var config int MCM_Version;
@@ -29,6 +32,9 @@ function LoadConfigs()
 	MCM_NoCover.WillLoss = `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.NO_COVER.WILL_LOSS, MCM_NoCover.WillLoss);
 	MCM_NoCover.LossChance = `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.NO_COVER.LOSS_CHANCE, MCM_NoCover.LossChance);
 	MCM_NoCover.PanicChance = `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.NO_COVER.PANIC_CHANCE, MCM_NoCover.PanicChance);
+	MCM_ApplyFlankingRules = `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.APPLY_FLANKING_RULES, MCM_ApplyFlankingRules);
+	MCM_SmokePanicReduction = `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.SMOKE_REDUCES_PANIC_CHANCE, MCM_SmokePanicReduction);
+	MCM_MarkedPanicIncrease = `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.MARKED_INCREASES_PANIC_CHANCE, MCM_MarkedPanicIncrease);
 	MCM_AlsoApplyToConcealedUnits = `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.ALSO_APPLY_TO_CONCEALED_UNITS, MCM_AlsoApplyToConcealedUnits);
 }
 

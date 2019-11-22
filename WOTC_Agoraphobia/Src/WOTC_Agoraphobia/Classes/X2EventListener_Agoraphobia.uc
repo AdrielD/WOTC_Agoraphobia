@@ -35,6 +35,7 @@ static protected function EventListenerReturn OnPlayerTurnEnded(Object EventData
 static function bool ShouldRollAgoraphobia(XComGameState_Unit TargetUnit)
 {
 	local XComGameState_EvacZone EvacZone;
+
 	EvacZone = class'XComGameState_EvacZone'.static.GetEvacZone(TargetUnit.GetTeam());
 
 	if(TargetUnit.IsPlayerControlled()
@@ -42,6 +43,7 @@ static function bool ShouldRollAgoraphobia(XComGameState_Unit TargetUnit)
 		&& TargetUnit.CanTakeCover()
 		&& !TargetUnit.IsUnconscious()
 		&& !TargetUnit.IsDazed()
+		&& !TargetUnit.IsMindControlled()
 		&& !TargetUnit.bRemovedFromPlay
 		&& !EvacZone.IsUnitInEvacZone(TargetUnit)
 		&& class'Agoraphobia_DefaultSettings'.default.IGNORE_UNIT_TEMPLATES.Find(TargetUnit.GetMyTemplateName()) < 0)
@@ -62,37 +64,58 @@ static function ApplyWillPenaltyOnTurnEnd(Object EventData)
 
 	foreach `XCOMHISTORY.IterateByClassType(class'XComGameState_Unit', TargetUnit)
 	{
-		if(ShouldRollAgoraphobia(TargetUnit))
-		{
-			CoverType = TargetUnit.GetCoverTypeFromLocation();
+		if(!ShouldRollAgoraphobia(TargetUnit))
+			return;
 
-			if(CoverType == CT_None)
-				ApplyAgoraphobiaAtNoCover(TargetUnit);
-			else if(CoverType == CT_MidLevel)
-				ApplyAgoraphobiaAtLowCover(TargetUnit);
-			else if(CoverType == CT_Standing)
-				ApplyAgoraphobiaAtHighCover(TargetUnit);
+		if(IsFlankingRuleEnabled() && TargetUnit.IsFlanked())
+		{
+			ApplyAgoraphobiaAtNoCover(TargetUnit);
+			return;
 		}
+
+		CoverType = TargetUnit.GetCoverTypeFromLocation();
+
+		if(CoverType == CT_None)
+			ApplyAgoraphobiaAtNoCover(TargetUnit);
+		else if(CoverType == CT_MidLevel)
+			ApplyAgoraphobiaAtLowCover(TargetUnit);
+		else if(CoverType == CT_Standing)
+			ApplyAgoraphobiaAtHighCover(TargetUnit);
 	}
 }
 
-static function ApplyAgoraphobiaAtNoCover(XComGameState_Unit TargetUnit)
+static function ApplyAgoraphobia(XComGameState_Unit TargetUnit, int WillLoss, int LossChance, int PanicChance)
 {
-	if(Rand(100) <= GetLossChanceAtNoCover())
-		SubmitUnitWillChangeToGameState(TargetUnit, GetWillLossAtNoCover(), GetPanicChanceAtNoCover());
+	local int FinalPanicChance;
+	local bool IsUnitOnSmokeTile, IsUnitMarked, IsUnitImmune;
+
+	IsUnitOnSmokeTile = TargetUnit.AffectedByEffectNames.Find('SmokeGrenade') != INDEX_NONE;
+	IsUnitMarked = TargetUnit.AffectedByEffectNames.Find('MarkedTarget') != INDEX_NONE;
+	IsUnitImmune = TargetUnit.AffectedByEffectNames.Find('MindShieldImmunity') != INDEX_NONE;
+
+	FinalPanicChance = PanicChance;
+
+	if(IsUnitOnSmokeTile)
+		FinalPanicChance = FinalPanicChance - (PanicChance * GetSmokePanicReduction() / 100);
+	
+	if(IsUnitMarked)
+		FinalPanicChance = FinalPanicChance + (PanicChance * GetMarkedPanicIncrease() / 100);
+
+	if(IsUnitImmune)
+		LossChance = 0;
+
+	if(Rand(100) < LossChance)
+		SubmitUnitWillChangeToGameState(TargetUnit, WillLoss, FinalPanicChance);
 }
+
+static function ApplyAgoraphobiaAtNoCover(XComGameState_Unit TargetUnit)
+{ ApplyAgoraphobia(TargetUnit, GetWillLossAtNoCover(), GetLossChanceAtNoCover(), GetPanicChanceAtNoCover()); }
 
 static function ApplyAgoraphobiaAtLowCover(XComGameState_Unit TargetUnit)
-{
-	if(Rand(100) <= GetLossChanceAtLowCover())
-		SubmitUnitWillChangeToGameState(TargetUnit, GetWillLossAtLowCover(), GetPanicChanceAtLowCover());
-}
+{ ApplyAgoraphobia(TargetUnit, GetWillLossAtLowCover(), GetLossChanceAtLowCover(), GetPanicChanceAtLowCover()); }
 
 static function ApplyAgoraphobiaAtHighCover(XComGameState_Unit TargetUnit)
-{
-	if(Rand(100) <= GetLossChanceAtHighCover())
-		SubmitUnitWillChangeToGameState(TargetUnit, GetWillLossAtHighCover(), GetPanicChanceAtHighCover());
-}
+{ ApplyAgoraphobia(TargetUnit, GetWillLossAtHighCover(),GetLossChanceAtHighCover(),  GetPanicChanceAtHighCover()); }
 
 static function SubmitUnitWillChangeToGameState(XComGameState_Unit TargetUnit, int WillLossAmount, int PanicChance)
 {
@@ -152,5 +175,14 @@ static function int GetPanicChanceAtNoCover()
 { return `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.NO_COVER.PANIC_CHANCE, class'Agoraphobia_MCMSettings'.default.MCM_NoCover.PanicChance); }
 
 // Miscellanious
+static function bool IsFlankingRuleEnabled()
+{ return `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.APPLY_FLANKING_RULES, class'Agoraphobia_MCMSettings'.default.MCM_ApplyFlankingRules); }
+
+static function int GetSmokePanicReduction()
+{ return `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.SMOKE_REDUCES_PANIC_CHANCE, class'Agoraphobia_MCMSettings'.default.MCM_SmokePanicReduction); }
+
+static function int GetMarkedPanicIncrease()
+{ return `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.MARKED_INCREASES_PANIC_CHANCE, class'Agoraphobia_MCMSettings'.default.MCM_MarkedPanicIncrease); }
+
 static function bool DoesApplyToConcealedunits()
 { return `MCM_CH_GetValue(class'Agoraphobia_DefaultSettings'.default.ALSO_APPLY_TO_CONCEALED_UNITS, class'Agoraphobia_MCMSettings'.default.MCM_AlsoApplyToConcealedUnits); }
