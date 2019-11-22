@@ -89,9 +89,11 @@ static function ApplyAgoraphobia(XComGameState_Unit TargetUnit, int WillLoss, in
 	local int FinalPanicChance;
 	local bool IsUnitOnSmokeTile, IsUnitMarked, IsUnitImmune;
 
-	IsUnitOnSmokeTile = TargetUnit.AffectedByEffectNames.Find('SmokeGrenade') != INDEX_NONE;
+	IsUnitOnSmokeTile = TargetUnit.IsInWorldEffectTile(class'X2Effect_ApplySmokeGrenadeToWorld'.default.Class.Name);
 	IsUnitMarked = TargetUnit.AffectedByEffectNames.Find('MarkedTarget') != INDEX_NONE;
 	IsUnitImmune = TargetUnit.AffectedByEffectNames.Find('MindShieldImmunity') != INDEX_NONE;
+
+	`LOG("SMOKE ON: " @ IsUnitOnSmokeTile @ " ALTERNATE: " @ TargetUnit.IsInWorldEffectTile(class'X2Effect_ApplySmokeGrenadeToWorld'.default.Class.Name), true, 'WOTC_agoraphobia');
 
 	FinalPanicChance = PanicChance;
 
